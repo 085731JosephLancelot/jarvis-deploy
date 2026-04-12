@@ -66,4 +66,18 @@ class NotificationServiceTest {
     void getMinimumLevel_returnsConfiguredLevel() {
         assertEquals(NotificationLevel.WARNING, service.getMinimumLevel());
     }
+
+    @Test
+    void getHistory_isEmptyAfterNoNotifications() {
+        assertTrue(service.getHistory().isEmpty());
+    }
+
+    @Test
+    void send_multipleEventsAccumulateInHistory() {
+        service.notify("dep-8", "prod", "first error",  NotificationLevel.ERROR);
+        service.notify("dep-9", "prod", "second error", NotificationLevel.ERROR);
+        service.notify("dep-10", "prod", "third error", NotificationLevel.CRITICAL);
+
+        assertEquals(3, service.getHistory().size());
+    }
 }
