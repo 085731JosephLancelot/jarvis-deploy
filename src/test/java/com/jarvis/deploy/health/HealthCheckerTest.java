@@ -78,4 +78,13 @@ class HealthCheckerTest {
         assertEquals(10, healthChecker.getTimeoutSeconds());
         assertEquals(3, healthChecker.getMaxRetries());
     }
+
+    @Test
+    void checkResultDetailsAreImmutable() {
+        HealthCheckResult result = healthChecker.check(activeEnvironment);
+
+        assertThrows(UnsupportedOperationException.class,
+                () -> result.getDetails().put("injected", "value"),
+                "Details map should be unmodifiable to prevent external mutation");
+    }
 }
