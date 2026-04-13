@@ -35,12 +35,29 @@ public class RetryPolicy {
         return maxDelay;
     }
 
+    /**
+     * Computes the delay before the given attempt number using exponential backoff.
+     * Attempt numbers are 1-based; attempt 1 uses the initial delay.
+     *
+     * @param attemptNumber the 1-based attempt number
+     * @return the capped delay duration for that attempt
+     */
     public Duration computeDelay(int attemptNumber) {
         if (attemptNumber <= 0) {
             return initialDelay;
         }
         long millis = (long) (initialDelay.toMillis() * Math.pow(backoffMultiplier, attemptNumber - 1));
         return Duration.ofMillis(Math.min(millis, maxDelay.toMillis()));
+    }
+
+    /**
+     * Returns whether retrying is allowed after the given 1-based attempt number.
+     *
+     * @param attemptNumber the number of attempts already made
+     * @return true if another attempt is permitted
+     */
+    public boolean shouldRetry(int attemptNumber) {
+        return attemptNumber < maxAttempts;
     }
 
     public static Builder builder() {
