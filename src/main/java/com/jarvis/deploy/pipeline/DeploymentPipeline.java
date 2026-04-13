@@ -31,6 +31,10 @@ public class DeploymentPipeline {
 
     public void addStage(PipelineStage stage) {
         Objects.requireNonNull(stage, "stage must not be null");
+        if (status != PipelineStatus.PENDING) {
+            throw new IllegalStateException(
+                "Cannot add stages to a pipeline that has already started (status=" + status + ")");
+        }
         stages.add(stage);
     }
 
@@ -48,6 +52,17 @@ public class DeploymentPipeline {
     public void fail() {
         this.status = PipelineStatus.FAILED;
         this.completedAt = Instant.now();
+    }
+
+    /**
+     * Returns the current active stage (the first stage that is not yet completed or failed),
+     * or an empty Optional if all stages have finished or no stages exist.
+     */
+    public java.util.Optional<PipelineStage> getActiveStage() {
+        return stages.stream()
+                .filter(s -> s.getStatus() != PipelineStageStatus.COMPLETED
+                          && s.getStatus() != PipelineStageStatus.FAILED)
+                .findFirst();
     }
 
     public String getPipelineId() { return pipelineId; }
