@@ -60,6 +60,20 @@ public class RetryPolicy {
         return attemptNumber < maxAttempts;
     }
 
+    /**
+     * Returns the total maximum wait time across all retry delays, i.e. the sum
+     * of computed delays for attempts 1 through (maxAttempts - 1).
+     *
+     * @return the total cumulative delay duration across all retries
+     */
+    public Duration totalMaxWait() {
+        Duration total = Duration.ZERO;
+        for (int attempt = 1; attempt < maxAttempts; attempt++) {
+            total = total.plus(computeDelay(attempt));
+        }
+        return total;
+    }
+
     public static Builder builder() {
         return new Builder();
     }
@@ -90,6 +104,9 @@ public class RetryPolicy {
         }
 
         public Builder initialDelay(Duration initialDelay) {
+            if (initialDelay == null || initialDelay.isNegative()) {
+                throw new IllegalArgumentException("initialDelay must be non-null and non-negative");
+            }
             this.initialDelay = initialDelay;
             return this;
         }
@@ -101,6 +118,9 @@ public class RetryPolicy {
         }
 
         public Builder maxDelay(Duration maxDelay) {
+            if (maxDelay == null || maxDelay.isNegative()) {
+                throw new IllegalArgumentException("maxDelay must be non-null and non-negative");
+            }
             this.maxDelay = maxDelay;
             return this;
         }
