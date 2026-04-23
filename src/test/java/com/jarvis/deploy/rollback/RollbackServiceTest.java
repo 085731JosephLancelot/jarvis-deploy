@@ -52,6 +52,22 @@ class RollbackServiceTest {
     }
 
     @Test
+    void rollback_shouldSkipFailedDeploymentsAndFindLastSuccessful() {
+        Deployment current = new Deployment("prod", "3.0.0", DeploymentStatus.SUCCESS);
+        Deployment failed = new Deployment("prod", "2.5.0", DeploymentStatus.FAILED);
+        Deployment previous = new Deployment("prod", "2.0.0", DeploymentStatus.SUCCESS);
+        List<Deployment> history = Arrays.asList(current, failed, previous);
+
+        when(deploymentService.getDeploymentHistory("prod")).thenReturn(history);
+
+        Deployment result = rollbackService.rollback("prod");
+
+        assertThat(result.getVersion()).isEqualTo("2.0.0");
+        verify(deploymentService).promoteDeployment(eq("prod"), eq("2.0.0"));
+        verify(auditLogger).log(any());
+    }
+
+    @Test
     void rollback_shouldThrowWhenNoSuccessfulDeploymentExists() {
         Deployment failed = new Deployment("staging", "1.0.0", DeploymentStatus.FAILED);
         when(deploymentService.getDeploymentHistory("staging")).thenReturn(List.of(failed));
