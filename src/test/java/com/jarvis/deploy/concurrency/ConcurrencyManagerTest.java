@@ -89,13 +89,16 @@ class ConcurrencyManagerTest {
     @Test
     void concurrencyPolicy_strict_throwsOnInvalidArgs() {
         assertThrows(IllegalArgumentException.class,
-                () -> new ConcurrencyPolicy("env", 0,
-                        ConcurrencyPolicy.OverflowStrategy.REJECT, 0));
+                () -> ConcurrencyPolicy.strict(null));
         assertThrows(IllegalArgumentException.class,
-                () -> new ConcurrencyPolicy("env", 1,
-                        ConcurrencyPolicy.OverflowStrategy.QUEUE, -1));
-        assertThrows(NullPointerException.class,
-                () -> new ConcurrencyPolicy(null, 1,
-                        ConcurrencyPolicy.OverflowStrategy.REJECT, 0));
+                () -> ConcurrencyPolicy.strict(""));
+    }
+
+    @Test
+    void concurrencyPolicy_queued_throwsOnNegativeLimits() {
+        assertThrows(IllegalArgumentException.class,
+                () -> ConcurrencyPolicy.queued("staging", -1, 3));
+        assertThrows(IllegalArgumentException.class,
+                () -> ConcurrencyPolicy.queued("staging", 1, -1));
     }
 }
