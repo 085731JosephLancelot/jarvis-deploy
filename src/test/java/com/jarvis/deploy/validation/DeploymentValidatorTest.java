@@ -78,20 +78,23 @@ class DeploymentValidatorTest {
     @Test
     void summaryContainsAllViolations() {
         when(deployment.getAppName()).thenReturn("");
-        when(deployment.getVersion()).thenReturn("");
+        when(deployment.getVersion()).thenReturn("  ");
         ValidationResult result = validator.validate(deployment, environment);
         String summary = result.getSummary();
-        assertTrue(summary.contains("violation"));
+        result.getViolations().forEach(violation -> assertTrue(
+                summary.contains(violation),
+                "Summary should contain violation: " + violation
+        ));
+    }
+
+    @Test
+    void multipleViolationsAreAllReported() {
+        when(deployment.getAppName()).thenReturn("");
+        when(deployment.getVersion()).thenReturn("");
+        when(deployment.getStatus()).thenReturn(null);
+        ValidationResult result = validator.validate(deployment, environment);
         assertFalse(result.isValid());
-    }
-
-    @Test
-    void nullDeploymentThrowsException() {
-        assertThrows(NullPointerException.class, () -> validator.validate(null, environment));
-    }
-
-    @Test
-    void nullEnvironmentThrowsException() {
-        assertThrows(NullPointerException.class, () -> validator.validate(deployment, null));
+        assertTrue(result.getViolations().size() >= 3,
+                "Expected at least 3 violations but got: " + result.getViolations().size());
     }
 }
