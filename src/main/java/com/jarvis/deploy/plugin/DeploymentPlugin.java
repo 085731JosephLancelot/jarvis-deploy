@@ -41,6 +41,17 @@ public class DeploymentPlugin {
         return config.get(key);
     }
 
+    /**
+     * Returns the config value for the given key, or the provided default if the key is absent.
+     *
+     * @param key          the config key to look up
+     * @param defaultValue the value to return if the key is not present
+     * @return the config value, or {@code defaultValue} if not found
+     */
+    public String getConfigValueOrDefault(String key, String defaultValue) {
+        return config.getOrDefault(key, defaultValue);
+    }
+
     @Override
     public String toString() {
         return String.format("DeploymentPlugin{id='%s', name='%s', version='%s', type=%s, enabled=%b}",
